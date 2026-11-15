@@ -1,7 +1,7 @@
 /* MES Thermaclim – saisie des fiches de mise en service et édition des rapports PDF.
    Tout fonctionne hors ligne : données et photos dans IndexedDB, modèles PDF en cache. */
 'use strict';
-const VERSION = '1.1.2';
+const VERSION = '1.1.3';
 const DEFAULT_CHANTIERS = [
   'T26-CH0205_REPOSOIR 10 - 14B', "T26-CH0197_CLIM O'HANA", 'T26-CH0101_ARBORA B11', 'T26-CH0184_ASTERS 22',
   'T26-CH0123_SAPAY', 'T26-CH0122_MONNIAZ 121 - Jussy', 'T25-CH1209 BLANCHERIE 14-24', 'T26-CH0086_PREFAULLY 25',
@@ -493,7 +493,8 @@ async function syncBureau(manual) {
     for (const bc of B.chantiers || []) {
       let c = S.chantiers.find(x => norm(x.code) === norm(bc.code));
       if (!c) { c = { id: uid(), code: bc.code, nom: bc.nom || '', adresse: bc.adresse || '' }; S.chantiers.push(c); }
-      else { if (bc.adresse && !c.adresse) c.adresse = bc.adresse; if (bc.nom && !c.nom) c.nom = bc.nom; }
+      else { if (bc.adresse && (!c.adresse || c.adresse === c.bureauAdresse || /^Villa O'Hana, 1291/.test(c.adresse))) c.adresse = bc.adresse; if (bc.nom && !c.nom) c.nom = bc.nom; }
+      c.bureauAdresse = bc.adresse || c.bureauAdresse;
     }
     const ignored = new Set(S.settings.prepIgnored || []);
     // une préparation avec plus de lignes que la fiche n'en contient est découpée en plusieurs fiches (1/2, 2/2…)
