@@ -1,7 +1,66 @@
 {
   "info": "Fiches préparées au bureau : valeurs théoriques envoyées automatiquement sur les téléphones. Format : voir PREPARATION.md",
   "chantiers": [
-    { "code": "T26-CH0123", "nom": "SAPAY", "adresse": "Chemin de Compostelle 19, 1212 Lancy" }
+    {
+      "code": "T26-CH0205",
+      "nom": "REPOSOIR 10 - 14B",
+      "adresse": "Chemin du Reposoir 10 et 14 bis, 1007 Lausanne"
+    },
+    {
+      "code": "T26-CH0197",
+      "nom": "CLIM O'HANA",
+      "adresse": "Villa O'Hana, 1291 Commugny"
+    },
+    {
+      "code": "T26-CH0101",
+      "nom": "ARBORA B11",
+      "adresse": "Arbora 2 – bâtiment B11, 1023 Crissier"
+    },
+    {
+      "code": "T26-CH0184",
+      "nom": "ASTERS 22",
+      "adresse": "Rue des Asters 22, 1202 Genève"
+    },
+    {
+      "code": "T26-CH0123",
+      "nom": "SAPAY",
+      "adresse": "Chemin de Compostelle 19, 1212 Lancy"
+    },
+    {
+      "code": "T26-CH0122",
+      "nom": "MONNIAZ 121 - Jussy",
+      "adresse": "Route de Monniaz 121, 1254 Jussy"
+    },
+    {
+      "code": "T25-CH1209",
+      "nom": "BLANCHERIE 14-24",
+      "adresse": "Av. de la Blancherie 14-24, 1022 Chavannes-près-Renens"
+    },
+    {
+      "code": "T26-CH0086",
+      "nom": "PREFAULLY 25",
+      "adresse": "Av. de Préfaully 25, 1022 Chavannes-près-Renens"
+    },
+    {
+      "code": "T26-CH0104",
+      "nom": "ROVERAY 14",
+      "adresse": "Rue du Roveray 14, 1207 Genève"
+    },
+    {
+      "code": "T25-CH1157",
+      "nom": "GRANGE LEVRIER 14-19 - VENT",
+      "adresse": "Rue Grange-Lévrier 14-19, 1220 Vernier (Les Avanchets)"
+    },
+    {
+      "code": "T25-CH1164",
+      "nom": "Chemin de Blonay 1, Veyrier",
+      "adresse": "Chemin de Blonay 1, 1255 Veyrier"
+    },
+    {
+      "code": "T25-CH1147",
+      "nom": "PRE-MONNARD",
+      "adresse": "Chemin du Pré-Monnard 11, 1213 Petit-Lancy"
+    }
   ],
   "fiches": [
     {
@@ -9,13 +68,26 @@
       "chantier": "T26-CH0123",
       "type": "ventil-debit",
       "titre": "Monobloc VTC 700 R – soufflage (pulsion)",
-      "valeurs": { "Désignation": "Monobloc VTC 700 R – soufflage", "Débit souhaité": "750" },
+      "valeurs": {
+        "Désignation": "Monobloc VTC 700 R – soufflage",
+        "Débit souhaité": "750"
+      },
       "lignes": {
-        "Marque": ["Systemair"],
-        "Type": ["SAVE VTC 700 R (art. 488844)"],
-        "Puissance (kW)": ["0.17"],
-        "Tension (V)": ["230"],
-        "Fréquence (Hz)": ["50"]
+        "Marque": [
+          "Systemair"
+        ],
+        "Type": [
+          "SAVE VTC 700 R (art. 488844)"
+        ],
+        "Puissance (kW)": [
+          "0.17"
+        ],
+        "Tension (V)": [
+          "230"
+        ],
+        "Fréquence (Hz)": [
+          "50"
+        ]
       }
     },
     {
@@ -23,13 +95,26 @@
       "chantier": "T26-CH0123",
       "type": "ventil-debit",
       "titre": "Monobloc VTC 700 R – extraction (reprise)",
-      "valeurs": { "Désignation": "Monobloc VTC 700 R – extraction", "Débit souhaité": "750" },
+      "valeurs": {
+        "Désignation": "Monobloc VTC 700 R – extraction",
+        "Débit souhaité": "750"
+      },
       "lignes": {
-        "Marque": ["Systemair"],
-        "Type": ["SAVE VTC 700 R (art. 488844)"],
-        "Puissance (kW)": ["0.17"],
-        "Tension (V)": ["230"],
-        "Fréquence (Hz)": ["50"]
+        "Marque": [
+          "Systemair"
+        ],
+        "Type": [
+          "SAVE VTC 700 R (art. 488844)"
+        ],
+        "Puissance (kW)": [
+          "0.17"
+        ],
+        "Tension (V)": [
+          "230"
+        ],
+        "Fréquence (Hz)": [
+          "50"
+        ]
       }
     }
   ]
