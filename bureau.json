@@ -1,5 +1,36 @@
 {
   "info": "Fiches préparées au bureau : valeurs théoriques envoyées automatiquement sur les téléphones. Format : voir PREPARATION.md",
-  "chantiers": [],
-  "fiches": []
+  "chantiers": [
+    { "code": "T26-CH0123", "nom": "SAPAY", "adresse": "Chemin de Compostelle 19, 1212 Lancy" }
+  ],
+  "fiches": [
+    {
+      "ref": "sapay-monobloc-soufflage",
+      "chantier": "T26-CH0123",
+      "type": "ventil-debit",
+      "titre": "Monobloc VTC 700 R – soufflage (pulsion)",
+      "valeurs": { "Désignation": "Monobloc VTC 700 R – soufflage", "Débit souhaité": "750" },
+      "lignes": {
+        "Marque": ["Systemair"],
+        "Type": ["SAVE VTC 700 R (art. 488844)"],
+        "Puissance (kW)": ["0.17"],
+        "Tension (V)": ["230"],
+        "Fréquence (Hz)": ["50"]
+      }
+    },
+    {
+      "ref": "sapay-monobloc-extraction",
+      "chantier": "T26-CH0123",
+      "type": "ventil-debit",
+      "titre": "Monobloc VTC 700 R – extraction (reprise)",
+      "valeurs": { "Désignation": "Monobloc VTC 700 R – extraction", "Débit souhaité": "750" },
+      "lignes": {
+        "Marque": ["Systemair"],
+        "Type": ["SAVE VTC 700 R (art. 488844)"],
+        "Puissance (kW)": ["0.17"],
+        "Tension (V)": ["230"],
+        "Fréquence (Hz)": ["50"]
+      }
+    }
+  ]
 }
