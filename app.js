@@ -1,7 +1,7 @@
 /* MES Thermaclim – saisie des fiches de mise en service et édition des rapports PDF.
    Tout fonctionne hors ligne : données et photos dans IndexedDB, modèles PDF en cache. */
 'use strict';
-const VERSION = '1.0.1';
+const VERSION = '1.1.0';
 const DEFAULT_CHANTIERS = [
   'T26-CH0205_REPOSOIR 10 - 14B', "T26-CH0197_CLIM O'HANA", 'T26-CH0101_ARBORA B11', 'T26-CH0184_ASTERS 22',
   'T26-CH0123_SAPAY', 'T26-CH0122_MONNIAZ 121 - Jussy', 'T25-CH1209 BLANCHERIE 14-24', 'T26-CH0086_PREFAULLY 25',
@@ -117,7 +117,7 @@ function viewChantier(app) {
     const cb = el('input', { type: 'checkbox', class: 'chk', onclick: e => e.stopPropagation(), onchange: e => { e.target.checked ? sel.add(r.id) : sel.delete(r.id); updBar(); } });
     cb.checked = sel.has(r.id);
     m.append(el('div', { class: 'card row', style: 'cursor:pointer', onclick: () => go({ name: 'rapport', id: r.id }) }, cb,
-      el('div', { class: 't', style: 'flex:1;min-width:0' }, el('b', {}, fi.title), el('span', { class: 'mu' }, [r.titre || r.values[fi.items.find(i => i.prefill === 'designation')?.f] || '', new Date(r.updated).toLocaleDateString('fr-CH'), np ? np + ' photo' + (np > 1 ? 's' : '') : ''].filter(Boolean).join(' · ')))));
+      el('div', { class: 't', style: 'flex:1;min-width:0' }, el('b', {}, fi.title, r.prepRef ? el('span', { class: 'badge', style: 'margin-left:6px' }, 'bureau') : null), el('span', { class: 'mu' }, [r.titre || r.values[fi.items.find(i => i.prefill === 'designation')?.f] || '', new Date(r.updated).toLocaleDateString('fr-CH'), np ? np + ' photo' + (np > 1 ? 's' : '') : ''].filter(Boolean).join(' · ')))));
   }
   m.append(el('button', { class: 'btn wide', onclick: () => go({ name: 'newfiche', id: c.id }) }, '+ Nouvelle fiche'));
   if (S.view.sel.size === 0 && rs.length) m.append(el('p', { class: 'mu', style: 'text-align:center' }, 'Coche plusieurs fiches pour les envoyer dans un seul mail.'));
@@ -154,10 +154,12 @@ function viewRapport(app) {
   app.append(header(fi.title, el('button', { onclick: () => { saveAll(); go({ name: 'chantier', id: c.id }); } }, '‹')));
   const m = el('main');
   m.append(el('div', { class: 'mu', style: 'margin:0 4px 10px' }, chantierLabel(c)));
+  if (r.bureau && Object.keys(r.bureau).length) m.append(el('div', { class: 'card burnote' }, el('b', {}, 'Fiche préparée par le bureau'), el('div', { class: 'mu' }, 'Les cases en jaune contiennent les valeurs théoriques à respecter. Complète les valeurs réelles mesurées.')));
   m.append(el('label', { class: 'f' }, el('span', {}, 'Nom de la fiche dans la liste (facultatif)'), el('input', { value: r.titre, placeholder: 'ex. Circulateur chauffage CH1', oninput: e => { r.titre = e.target.value; touch(); } })));
 
   const input = (it) => {
-    const attrs = { value: r.values[it.f] || '', oninput: e => { r.values[it.f] = e.target.value; touch(); } };
+    const bur = r.bureau && it.f in r.bureau;
+    const attrs = { value: r.values[it.f] || '', class: bur ? 'bur' : null, oninput: e => { r.values[it.f] = e.target.value; touch(); } };
     const inp = it.multi ? el('textarea', attrs) : el('input', Object.assign(attrs, { inputmode: /\((bar|kW|W|V|A|Hz|Pa|%|l\/h|m3\/h|mCE|kPa|Kpa)\)|°C|Nombre|DN|Débit|Pression|Puissance|Tension|Intensité|Volume|Qté/i.test(it.label) && !/Type|Marque|Vérification/.test(it.label) ? 'decimal' : null }));
     return inp;
   };
@@ -202,7 +204,7 @@ function viewRapport(app) {
   m.append(el('div', { style: 'height:16px' }),
     el('div', { class: 'row' },
       el('button', { class: 'btn sec', onclick: () => { const r2 = JSON.parse(JSON.stringify(r)); r2.id = uid(); r2.photos = {}; r2.titre = (r.titre || fi.title) + ' (copie)'; r2.created = r2.updated = Date.now(); S.rapports.push(r2); saveAll(); go({ name: 'rapport', id: r2.id }); toast('Fiche dupliquée (sans les photos)'); } }, 'Dupliquer'),
-      el('button', { class: 'btn del', onclick: () => { if (confirm('Supprimer cette fiche ?')) { delRapportPhotos(r); S.rapports = S.rapports.filter(x => x !== r); saveAll(); go({ name: 'chantier', id: c.id }); } } }, 'Supprimer')));
+      el('button', { class: 'btn del', onclick: () => { if (confirm('Supprimer cette fiche ?')) { delRapportPhotos(r); if (r.prepRef) (S.settings.prepIgnored = S.settings.prepIgnored || []).push(r.prepRef); S.rapports = S.rapports.filter(x => x !== r); saveAll(); go({ name: 'chantier', id: c.id }); } } }, 'Supprimer')));
   app.append(m);
   app.append(el('div', { class: 'bar' },
     el('button', { class: 'btn sec', onclick: () => previewPdf(r) }, 'Aperçu PDF'),
@@ -311,6 +313,8 @@ function viewSettings(app) {
     el('div', { class: 'card' }, el('p', { class: 'mu', style: 'margin-top:0' }, 'Les fiches sont enregistrées sur ce téléphone uniquement. Exporte une sauvegarde de temps en temps (sans les photos).'),
       el('div', { class: 'row' }, el('button', { class: 'btn sm sec', onclick: exportBackup }, 'Exporter'),
         el('button', { class: 'btn sm sec', onclick: importBackup }, 'Importer'))));
+  m.append(el('p', { class: 'mu', style: 'text-align:center' }, S.settings.bureauSync ? `Préparations bureau : synchronisées le ${new Date(S.settings.bureauSync).toLocaleString('fr-CH')}` : 'Préparations bureau : jamais synchronisées'),
+    el('div', { style: 'text-align:center;margin-bottom:10px' }, el('button', { class: 'btn sm sec', onclick: async () => { const n = await syncBureau(true); render(); } }, 'Synchroniser maintenant')));
   m.append(el('p', { class: 'mu', style: 'text-align:center' }, `Version ${VERSION} · ${S.fiches.length} modèles de fiches`));
   app.append(m);
 }
@@ -450,6 +454,87 @@ async function shareOrDownload(files, title, text) {
   toast('Fichier(s) téléchargé(s)');
 }
 
+/* ---------- fiches préparées au bureau (bureau.json) ---------- */
+const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[’'`]/g, "'").replace(/[^a-z0-9%/'°]+/g, ' ').trim();
+const lab = (a, b) => { const x = norm(a), y = norm(b); return x === y || (y.length >= 3 && x.startsWith(y)); };
+/* Traduit une préparation lisible (libellés) en valeurs de champs PDF. Renvoie aussi les libellés non reconnus. */
+function resolvePrep(fi, p) {
+  const values = {}, rows = {}, unknown = [];
+  const fields = fi.items.filter(i => i.k === 'text');
+  for (const [k, v] of Object.entries(p.valeurs || {})) {
+    const it = fields.find(i => norm(i.label) === norm(k)) || fields.find(i => lab(i.label, k));
+    if (it) values[it.f] = String(v); else unknown.push(k);
+  }
+  const ti = fi.items.findIndex(i => i.k === 'table'); const t = fi.items[ti];
+  const col = (k) => { let j = t.cols.findIndex(c => norm(c) === norm(k)); if (j < 0) j = t.cols.findIndex(c => lab(c, k)); return j; };
+  const putRow = (cells, obj, where) => {
+    if (Array.isArray(obj)) obj.forEach((v, j) => { if (v != null && v !== '' && cells[j]) values[cells[j]] = String(v); });
+    else for (const [k, v] of Object.entries(obj || {})) { const j = col(k); if (j >= 0) values[cells[j]] = String(v); else unknown.push(where + ' › ' + k); }
+  };
+  if (p.lignes && !t) unknown.push('lignes (cette fiche n’a pas de tableau)');
+  else if (p.lignes && t.rowLabels) {
+    for (const [k, v] of Object.entries(p.lignes)) { const j = t.rowLabels.findIndex(x => norm(x) === norm(k)) >= 0 ? t.rowLabels.findIndex(x => norm(x) === norm(k)) : t.rowLabels.findIndex(x => lab(x, k));
+      if (j >= 0) putRow(t.cells[j], v, k); else unknown.push('ligne ' + k); }
+  } else if (p.lignes) {
+    const ls = Array.isArray(p.lignes) ? p.lignes : [];
+    if (ls.length > t.cells.length) unknown.push(`${ls.length} lignes alors que la fiche n’en a que ${t.cells.length}`);
+    ls.slice(0, t.cells.length).forEach((l, j) => putRow(t.cells[j], l, 'ligne ' + (j + 1)));
+    rows[ti] = Math.min(t.cells.length, Math.max(1, ls.length));
+  }
+  return { values, rows, unknown };
+}
+let syncing = false;
+async function syncBureau(manual) {
+  if (syncing || !navigator.onLine) { if (manual) toast('Pas de réseau'); return 0; }
+  syncing = true;
+  try {
+    const res = await fetch('bureau.json?t=' + Date.now(), { cache: 'no-store' }); if (!res.ok) throw new Error('HTTP ' + res.status);
+    const B = await res.json(); let added = 0, updated = 0;
+    for (const bc of B.chantiers || []) {
+      let c = S.chantiers.find(x => norm(x.code) === norm(bc.code));
+      if (!c) { c = { id: uid(), code: bc.code, nom: bc.nom || '', adresse: bc.adresse || '' }; S.chantiers.push(c); }
+      else { if (bc.adresse && !c.adresse) c.adresse = bc.adresse; if (bc.nom && !c.nom) c.nom = bc.nom; }
+    }
+    const ignored = new Set(S.settings.prepIgnored || []);
+    // une préparation avec plus de lignes que la fiche n'en contient est découpée en plusieurs fiches (1/2, 2/2…)
+    const parts = [];
+    for (const p of B.fiches || []) {
+      const fi = fiche(p.type), t = fi && fi.items.find(i => i.k === 'table');
+      if (t && !t.rowLabels && Array.isArray(p.lignes) && p.lignes.length > t.cells.length) {
+        const n = Math.ceil(p.lignes.length / t.cells.length);
+        for (let k = 0; k < n; k++) parts.push({ ...p, ref: `${p.ref}#${k + 1}`, titre: `${p.titre || fi.title} (${k + 1}/${n})`, lignes: p.lignes.slice(k * t.cells.length, (k + 1) * t.cells.length) });
+      } else parts.push(p);
+    }
+    for (const p of parts) {
+      const fi = fiche(p.type); if (!fi || !p.ref) { console.warn('Préparation ignorée', p); continue; }
+      const c = S.chantiers.find(x => norm(x.code) === norm(p.chantier)); if (!c) { console.warn('Chantier inconnu', p.chantier); continue; }
+      const { values, rows } = resolvePrep(fi, p);
+      let r = S.rapports.find(x => x.prepRef === p.ref);
+      if (!r) {
+        if (ignored.has(p.ref)) continue;
+        r = newRapport(c, fi); r.prepRef = p.ref; r.titre = p.titre || ''; r.bureau = {};
+        S.rapports.push(r); added++;
+      }
+      const sig = JSON.stringify(p); if (r.prepSig === sig) continue;
+      // les valeurs du bureau remplacent les anciennes, sauf si le metteur au point les a modifiées
+      for (const [f, v] of Object.entries(values)) {
+        const old = r.bureau[f];
+        if (r.values[f] == null || r.values[f] === '' || r.values[f] === old || old === undefined && r.prepSig == null) r.values[f] = v;
+        r.bureau[f] = v;
+      }
+      for (const [i, n] of Object.entries(rows)) r.rows[i] = Math.max(r.rows[i] || 1, n);
+      if (p.titre && (!r.titre || r.titre === r.prepTitre)) r.titre = p.titre; r.prepTitre = p.titre;
+      if (r.prepSig) updated++;
+      r.prepSig = sig; r.updated = Date.now();
+    }
+    S.settings.bureauSync = Date.now(); await saveAll();
+    if (added || updated) toast(`${added ? added + ' fiche(s) préparée(s) reçue(s) du bureau' : ''}${added && updated ? ', ' : ''}${updated ? updated + ' mise(s) à jour' : ''}`, 3500);
+    else if (manual) toast('Tout est à jour');
+    return added + updated;
+  } catch (e) { console.warn('Synchro bureau', e); if (manual) toast('Synchro impossible : ' + e.message); return 0; }
+  finally { syncing = false; }
+}
+
 /* ---------- démarrage ---------- */
 async function init() {
   try { S.fiches = await (await fetch('fiches.json')).json(); }
@@ -463,6 +548,8 @@ async function init() {
   window.addEventListener('online', render); window.addEventListener('offline', render);
   window.addEventListener('pagehide', saveAll); document.addEventListener('visibilitychange', () => document.hidden && saveAll());
   render();
+  syncBureau().then(n => { if (n) render(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) syncBureau().then(n => { if (n) render(); }); });
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
 }
 init();
