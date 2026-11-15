@@ -1,7 +1,7 @@
 /* MES Thermaclim – saisie des fiches de mise en service et édition des rapports PDF.
    Tout fonctionne hors ligne : données et photos dans IndexedDB, modèles PDF en cache. */
 'use strict';
-const VERSION = '1.1.0';
+const VERSION = '1.1.1';
 const DEFAULT_CHANTIERS = [
   'T26-CH0205_REPOSOIR 10 - 14B', "T26-CH0197_CLIM O'HANA", 'T26-CH0101_ARBORA B11', 'T26-CH0184_ASTERS 22',
   'T26-CH0123_SAPAY', 'T26-CH0122_MONNIAZ 121 - Jussy', 'T25-CH1209 BLANCHERIE 14-24', 'T26-CH0086_PREFAULLY 25',
@@ -550,6 +550,11 @@ async function init() {
   render();
   syncBureau().then(n => { if (n) render(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) syncBureau().then(n => { if (n) render(); }); });
-  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    // dès qu'une nouvelle version est installée, on recharge pour l'afficher tout de suite
+    const had = !!navigator.serviceWorker.controller; let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (had && !reloaded) { reloaded = true; saveAll().then(() => location.reload()); } });
+    navigator.serviceWorker.register('sw.js').then(reg => document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update(); }));
+  }
 }
 init();
