@@ -1,7 +1,7 @@
 /* MES Thermaclim – saisie des fiches de mise en service et édition des rapports PDF.
    Tout fonctionne hors ligne : données et photos dans IndexedDB, modèles PDF en cache. */
 'use strict';
-const VERSION = '1.1.3';
+const VERSION = '1.2.0';
 const DEFAULT_CHANTIERS = [
   'T26-CH0205_REPOSOIR 10 - 14B', "T26-CH0197_CLIM O'HANA", 'T26-CH0101_ARBORA B11', 'T26-CH0184_ASTERS 22',
   'T26-CH0123_SAPAY', 'T26-CH0122_MONNIAZ 121 - Jussy', 'T25-CH1209 BLANCHERIE 14-24', 'T26-CH0086_PREFAULLY 25',
@@ -85,7 +85,7 @@ function render() {
 }
 
 function viewHome(app) {
-  app.append(header('MES Thermaclim', null, el('button', { onclick: () => go({ name: 'settings' }) }, 'Réglages')));
+  app.append(el('header', { class: 'home' }, el('img', { src: 'icons/logo.png', alt: 'Thermaclim Energies', class: 'logo' }), el('h1', {}, 'Mise en service'), el('button', { onclick: () => go({ name: 'settings' }) }, 'Réglages')));
   const m = el('main', { class: 'list' });
   if (!S.settings.nom) m.append(el('div', { class: 'card', onclick: () => go({ name: 'settings' }) }, el('div', { class: 't' }, el('b', {}, 'Première utilisation'), el('span', { class: 'mu' }, 'Indique ton nom et enregistre ta signature dans les Réglages.'))));
   m.append(el('h2', {}, 'Chantiers'));
@@ -551,7 +551,7 @@ async function init() {
   render();
   syncBureau().then(n => { if (n) render(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) syncBureau().then(n => { if (n) render(); }); });
-  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // dès qu'une nouvelle version est installée, on recharge pour l'afficher tout de suite
     const had = !!navigator.serviceWorker.controller; let reloaded = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => { if (had && !reloaded) { reloaded = true; saveAll().then(() => location.reload()); } });
