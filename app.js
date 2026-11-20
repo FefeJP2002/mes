@@ -1,7 +1,7 @@
 /* MES Thermaclim – saisie des fiches de mise en service et édition des rapports PDF.
    Tout fonctionne hors ligne : données et photos dans IndexedDB, modèles PDF en cache. */
 'use strict';
-const VERSION = '1.2.0';
+const VERSION = '1.2.1';
 const DEFAULT_CHANTIERS = [
   'T26-CH0205_REPOSOIR 10 - 14B', "T26-CH0197_CLIM O'HANA", 'T26-CH0101_ARBORA B11', 'T26-CH0184_ASTERS 22',
   'T26-CH0123_SAPAY', 'T26-CH0122_MONNIAZ 121 - Jussy', 'T25-CH1209 BLANCHERIE 14-24', 'T26-CH0086_PREFAULLY 25',
